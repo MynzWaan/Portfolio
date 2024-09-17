@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazing Weather App</title>
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+
+<!--Search Box-->
+<div class="card">
+    <div class="search">
+        <!--Let user enters text (Location)-->
+        <input type="text" placeholder="Which City Do You Wanna Go?"
+        spellcheck="false"> <!--Cancel suggestions-->
+        <button><img src="images/search.png"></button> 
+    </div>
+
+    <!--In case of invalid City's name-->
+    <div class="error">
+        <p>Hey! That city doesn't exist. Where are you??</p>
+    </div>
+
+    <div class="weather">
+        <img src="images/rain.png" class="weather-icon">
+        <h1 class="temp">22°c</h1>
+        <h2 class="city">New York</h2>
+        <div class="details">
+            <div class="col">
+                <img src="images/humidity.png">
+                <div>
+                    <p class="humidity">50%</p>
+                    <p>Humidity</p>
+                </div>
+            </div>
+            <div class="col">
+                <img src="images/wind.png">
+                <div>
+                    <p class="wind">15 km/hr</p>
+                    <p>Wind Speed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const apiKey = "e0bc9ba78ee4e0da707a156941d27873"; 
+const apiUrl = "https://api.openweathermap.org/data/2.5/weather?&units=metric&q=";
+
+const weatherIcon = document.querySelector(".weather-icon");
+/*user's input*/
+const searchBox = document.querySelector(".search input");
+const searchBtn = document.querySelector(".search button");
+
+async function checkWeather(city) {
+    try {
+        /*Data fetching and waits for it to come back*/
+        const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
+        /*If 404*/
+        if (response.status == 404) {
+            document.querySelector(".error").style.display = "block";
+            document.querySelector(".weather").style.display = "none";
+        /*If not == 404 then update data*/
+        } else {
+            /*Waits for the data in json format to be used*/
+            const data = await response.json();
+            /*UPDATE the data since now we have the API data*/
+            /*Select teh city element and innerHTML is used to update the text, using the actual names found in console*/
+            document.querySelector(".city").innerHTML = data.name;
+            document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°c";
+            document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+            document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
+            console.log(data.weather[0].main);
+            
+            //Update weather icon
+            switch (data.weather[0].main) {
+                case "Clouds":
+                    weatherIcon.src = "images/clouds.png";
+                    break;
+                case "Rain":
+                    weatherIcon.src = "images/rain.png";
+                    break;
+                case "Drizzle":
+                    weatherIcon.src = "images/drizzle.png";
+                    break;
+                case "Mist":
+                    weatherIcon.src = "images/mist.png";
+                    break;
+                case "Thunderstorm":
+                    weatherIcon.src = "images/thunderstorm.png";
+                    break;
+                case "Clear":
+                    weatherIcon.src = "images/Clear.png";
+                    break;
+                // Add more weather conditions here
+                default:
+                    weatherIcon.src = "images/default.png";
+                    break;
+            }
+
+            /*Shows weather elements when it was hidden before*/
+            document.querySelector(".weather").style.display = "block";
+            /*Hides elements with the class error*/
+            document.querySelector(".error").style.display = "none";
+        }
+    /*Specific error*/
+    } catch (error) {
+        console.error("Failed to fetch weather data:", error);
+        document.querySelector(".error").style.display = "block";
+        document.querySelector(".weather").style.display = "none";
+    }
+}
+/*Listen for the user's click then call the function*/
+searchBtn.addEventListener("click", () => {
+    /*City name in input field which is passed in checkWeather function*/
+    checkWeather(searchBox.value);
+})
+
+</script>
+
+</body>
+</html>

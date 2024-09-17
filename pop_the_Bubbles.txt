@@ -1,0 +1,248 @@
+import math
+import random
+import time
+import pygame
+pygame.init()
+
+#Bubble Pop noise
+pygame.mixer.init()
+bubble_pop_sound = pygame.mixer.Sound(r"C:\Users\picha\Downloads\733264__arttim__bubble_pop.mp3")
+
+#Background Music
+pygame.mixer.music.load(r"C:\Users\picha\Downloads\679355__kjartan_abel__pawsome-vibes-get-your-groove-on-with-meow-meow.wav")
+
+#Game window size
+WIDTH, HEIGHT = 800, 600
+
+#Display game window and give it a name
+WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Pop the Bubbles")
+
+#How OFTEN the NEW TARGETS will pop up
+TARGET_INCREMENT = 400  #NEW TARGET every 0.4s
+TARGET_EVENT = pygame.USEREVENT  #Event when new targets should appear
+
+TARGET_PADDING = 30  #Length between each target
+
+BG_COLOR = (255, 255, 0)  #Yellow bg-color
+LIVES = 10
+TOP_BAR_HEIGHT = 50  #For stats
+
+LABEL_FONT = pygame.font.SysFont("comicsans", 24)  #Label font
+
+#Load puffer fish image
+TACO_IMAGE = pygame.image.load(r"C:\Users\picha\OneDrive\Pictures\related to worls\880994e73c8c9c0538c5ea501759eae1.png")
+TACO_SIZE = (100, 100)
+TACO_IMAGE = pygame.transform.scale(TACO_IMAGE, TACO_SIZE)
+
+#How targets would look like
+class Target:
+    MAX_SIZE = 45  #Largest the target can grow to 
+    GROWTH_RATE = 0.2  #How fast the targets grow/shrink
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.size = 0  #The original size
+        self.grow = True  #Targets will expand ****
+    #Grow till MAX size --> SHRINK down
+    def update(self):
+        if self.size + self.GROWTH_RATE >= self.MAX_SIZE: #if it reaches max or more than --> STOP GROWING
+            self.grow = False #****
+        #Check what value it is eventually, T/F
+        if self.grow: #If T --> Targets will GROW
+            self.size += self.GROWTH_RATE
+        else: #If F --> Targets will SHRINK
+            self.size -= self.GROWTH_RATE
+    #DRAW Targets
+    def draw(self, win):
+        #Outer blue circle -- bubble
+        pygame.draw.circle(win, (0, 191, 255), (self.x, self.y), int(self.size))
+        #Slightly smaller -- lighter blue circle for inner shading
+        pygame.draw.circle(win, (135, 206, 250), (self.x, self.y), int(self.size * 0.9))
+        #Reflection -- small white circle
+        pygame.draw.circle(win, (255, 255, 255), (self.x - int(self.size * 0.3), self.y - int(self.size * 0.3)), int(self.size * 0.2))
+
+    #Check if user's CLICKS are WITHIN the TARGETS
+    def collide(self, x, y):
+        #Check distance between the clicks and the centers
+        dis = math.sqrt((x - self.x)**2 + (y - self.y)**2)
+        #Check if the distance from the CLICK to CENTER is LESS than or EQUAL to the SIZE of target
+        return dis <= self.size #Return T/F to wherever the collide method is called
+############################################
+class Taco:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.vx = random.choice([-3, 3])  # Random initial velocity
+        self.vy = random.choice([-3, 3])
+
+    def update(self):
+        self.x += self.vx
+        self.y += self.vy
+
+        # Bounce off walls
+        if self.x <= 0 or self.x + TACO_SIZE[0] >= WIDTH:
+            self.vx = -self.vx
+        if self.y <= TOP_BAR_HEIGHT or self.y + TACO_SIZE[1] >= HEIGHT:
+            self.vy = -self.vy
+
+    def draw(self, win):
+        win.blit(TACO_IMAGE, (self.x, self.y))
+
+    def collide(self, x, y):
+        return self.x <= x <= self.x + TACO_SIZE[0] and self.y <= y <= self.y + TACO_SIZE[1]
+############################################
+#Fill window with BG color
+def draw(win, targets, tacos):
+    win.fill(BG_COLOR)
+    #Call DRAW method (which is already defined in target class) in each target
+    #Draw targets and puffer_fish on window
+    for target in targets:
+        target.draw(win)
+    for taco in tacos:
+        taco.draw(win)
+#Calculate the time (from seconds) that will be display as string on top
+def format_time(secs):
+    milli = math.floor(int(secs * 1000 % 1000) / 100)
+    seconds = int(round(secs % 60, 1))
+    minutes = int(secs // 60)
+
+    return f"{minutes:02d}:{seconds:02d}.{milli}"
+#Draw the top bar showing--  time, speed, hits, and lives remaining
+                #window, amount of time since game starts, number of targets user hits, num of times user misses
+def draw_top_bar(win, elapsed_time, targets_pressed, misses):
+    #Draw + specifies (size) grey rectangle box 
+    pygame.draw.rect(win, "grey", (0, 0, WIDTH, TOP_BAR_HEIGHT))
+    #Create text label that will display as an image (using render method) elapse time on screen
+    time_label = LABEL_FONT.render(f"Time: {format_time(elapsed_time)}", 1, "black") #Convert text for it to be drawn on the screen
+    #Create text that displays amount of time that has passed
+
+    #Calculating speed when user hits targets
+    speed = round(targets_pressed / elapsed_time, 1)
+    speed_label = LABEL_FONT.render(f"Speed: {speed} t/s", 1, "black")
+    #Create text label showing the numbers of targets user hits
+    hits_label = LABEL_FONT.render(f"Hits: {targets_pressed}", 1, "black")
+    #Create text label showing the numbers of lives user has left 
+    lives_label = LABEL_FONT.render(f"Lives: {LIVES - misses}", 1, "black")
+
+    #Label them next to each other
+    win.blit(time_label, (5, 5))
+    win.blit(speed_label, (200, 5))
+    win.blit(hits_label, (450, 5))
+    win.blit(lives_label, (650, 5))
+
+#End screen
+def end_screen(win, elapsed_time, targets_pressed, clicks):
+    win.fill(BG_COLOR) #Fill screen with BG color
+    #Show Time Label
+    time_label = LABEL_FONT.render(f"Time: {format_time(elapsed_time)}", 1, "blue")
+
+    #Speed Label
+    speed = round(targets_pressed / elapsed_time, 1)
+    speed_label = LABEL_FONT.render(f"Speed: {speed} t/s", 1, "blue")
+
+    #Hits Label
+    hits_label = LABEL_FONT.render(f"Hits: {targets_pressed}", 1, "blue")
+    #Accuracy % Label
+    accuracy = round(targets_pressed / clicks * 100, 1)
+    accuracy_label = LABEL_FONT.render(f"Accuracy: {accuracy}%", 1, "blue")
+
+    #Align them in the middle, one on top of another
+    win.blit(time_label, (get_middle(time_label), 100))
+    win.blit(speed_label, (get_middle(speed_label), 200))
+    win.blit(hits_label, (get_middle(hits_label), 300))
+    win.blit(accuracy_label, (get_middle(accuracy_label), 400))
+    #Display the changes made
+    pygame.display.update()
+
+    #Make the WHILE loop keeps executed 
+    run = True
+    while run:
+        #Check what key user presses
+        for event in pygame.event.get():
+            #If user presses close game window/any keys --> QUIT the game
+            if event.type == pygame.QUIT or event.type == pygame.KEYDOWN:
+                quit()
+
+#Fucntion that makes sure that all the elements are align in the center horizontally
+def get_middle(surface):
+    return WIDTH / 2 - surface.get_width()/2
+
+def main():
+    pygame.mixer.music.set_volume(0.25) #Adjusts volumn
+    pygame.mixer.music.play(-1) #Plays indefinitely
+    run = True
+    targets = [] #Stores targets that appear on the screen
+    ##############
+    tacos = [Taco(random.randint(0, WIDTH - TACO_SIZE[0]), random.randint(TOP_BAR_HEIGHT, HEIGHT - TACO_SIZE[1])) for _ in range(3)]
+    ##############
+    clock = pygame.time.Clock() #Manage game frame rate
+    targets_pressed = 0 #Keeps track of how many targets user presses successfully
+    clicks = 0 #Counts the total number of times the player has clicked the mouse
+    misses = 0 #Keeps track how many targets have disappeared without being clicked
+    start_time = time.time() #Gets the time when the game starts
+    pygame.time.set_timer(TARGET_EVENT, TARGET_INCREMENT) #Make the targets keep appearing by as per how often the new targets appear (every 0.4s)
+
+    while run:
+        clock.tick(60) #Ensures the game runs at 60 frames per second
+        click = False #Clik will become T whenever user clicks, starts off as F
+        mouse_pos = pygame.mouse.get_pos() #Gets the current position of mouse cursor 
+        elapsed_time = time.time() - start_time #Calculate how much time has passed since the game starts
+
+        for event in pygame.event.get(): #Loop that goes thru all events
+            if event.type == pygame.QUIT:  #If user shuts the game down, it will stop running
+                run = False
+                break
+            if event.type == TARGET_EVENT:
+                #Create new targets 
+                x = random.randint(TARGET_PADDING, WIDTH - TARGET_PADDING) #Ramdonly pick X-coor within range but
+                #keeps them away from edges and prevent them from going off the right side
+                y = random.randint(TARGET_PADDING + TOP_BAR_HEIGHT, HEIGHT - TARGET_PADDING)  #Ramdomly pick Y-coor within range but
+                #keeps them away from top bar and off the bottom
+
+                target = Target(x, y) #Create the new targets made by the above lines of code
+                targets.append(target) #Adds new targets created to the list
+            #Keeps track of the clicks
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                click = True
+                clicks += 1
+        #Goes thru each target in target loop
+        for target in targets:
+            target.update() #Manage shrink/growth
+            #If targets shrink down to 0 --> Remove them completely
+            if target.size <= 0:
+                targets.remove(target)
+                misses += 1 #Count misses 
+            #If player hits targets --> Make them disppeared and increase counts
+            if click and target.collide(*mouse_pos):
+                targets.remove(target)
+                targets_pressed += 1
+                bubble_pop_sound.set_volume(0.28)
+                bubble_pop_sound.play()
+         #If user misses more than/equal to total lives --> displays end screen
+
+        #################################
+        for taco in tacos:
+            taco.update()
+            if click and taco.collide(*mouse_pos):
+                misses = LIVES
+                pygame.mixer.music.stop()
+                end_screen(WIN, elapsed_time, targets_pressed, clicks)
+                pygame.mixer.music.stop()
+        ################################# 
+
+        #If user misses more than/equal to total lives --> displays end screen
+        if misses >= LIVES:
+            pygame.mixer.music.stop() #Stops the BG music
+            end_screen(WIN, elapsed_time, targets_pressed, clicks)
+            pygame.mixer.music.stop()
+
+        draw(WIN, targets, tacos) #Draw targets and puffer fish
+        draw_top_bar(WIN, elapsed_time, targets_pressed, misses)
+        pygame.display.update() #Refreshes game win --> displays stats
+
+    pygame.quit()
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,173 @@
+body, h4{ 
+    margin: 0; /* Reset the default margin, padding, including the most top header so it's easier and cleaner to design. */
+    padding: 0;
+}
+
+
+a, h4, ul {
+    color:black; /*Makes all the links black instead of blue.*/
+    
+}
+
+.iframe-position, .box, img, #might, #listeners, #spotify, #monthly { /*Make them move freely, not stacking on top of each other*/
+    position: absolute;
+}
+
+.iframe-position, #might, img {
+    right: 16px;
+}
+
+#teach, #monthly {
+    font-size:30px;
+}
+
+#funfact, ul {
+    font-size: 24px;
+    background-color: rgba(247, 224, 163, 1);  /*CREAM BG*/
+    box-shadow:
+    9px 8px 0px darkred, /*DARKRED SHADOW*/
+    10px 8px 0px darkred,
+    11px 8px 0px darkred,
+    12px 8px 0px darkred; 
+    ;
+    height:20%; /*20% HEIGHT*/
+}
+
+h3, #listeners, #monthly {
+    color:white;
+}
+
+#might, #spotify, #teach { /*Assigned the same text-shadow value*/
+    text-shadow: 2px 5px 2px black; /*The length horizontally, vertically from the text, and how blur it is*/
+}
+
+#listeners, #spotify, #teach {
+    font-weight:bold;
+}
+
+.filter { /*Put bg image*/
+    background-image: url("https://miro.medium.com/v2/resize:fit:1200/1*eOBzLqayEf1xJaIXr7YP3w.jpeg");
+    filter:brightness(60%); /*Filter for bg image*/
+    position: fixed; /*So when the usef scrolls it won't move accordingly.*/
+    width: 100%;
+    height: 100%; 
+    z-index: -1; /*Set it to be behind all the elements*/
+    background-position: center; /*Adjust it exactly to be in the centre.*/
+    background-repeat: no-repeat; /*Stop it from repeating the same bg image the whole page*/
+    background-size: cover; /*Makes sure it covers the page fully.*/
+    opacity: 0.85; /*Adjust the opacity of the bg image*/
+}
+
+#teach {
+    text-align:center; /*Center the text*/
+    letter-spacing:2px; /*How far between letter and letter*/
+    top:60px; /*The distance from the top*/
+}
+
+h4 {
+    font-family: cursive;
+    font-weight:3; /*Adjust how thick the letters are*/
+    font-size:50px;
+    letter-spacing: 30px;
+    height:40;
+    background-color:#f25a38;
+    
+}
+
+h1 {
+    padding-left:15px; /*The distance from the left side*/
+    font-size: 89px;
+    color:#DAA520;
+    text-shadow:  /*Applying none blurry shadow, so the last value is set to 0, and to make the shadow thicker to the side, the horizontal values are adjusted.*/
+    9px 2.5px 0px #6e0d0d,
+    8px 2.5px 0px #6e0d0d,
+    7px 2.5px 0px #6e0d0d,
+    6px 2.5px 0px #6e0d0d,
+    5px 2.5px 0px #6e0d0d,
+    10px 2.5px 0px #6e0d0d,
+    11px 2.5px 0px #6e0d0d,
+    12px 2.5px 0px #6e0d0d; 
+    font-family: serif;
+    letter-spacing: 10px;
+   
+}
+
+#funfact {
+    padding-left:50px;
+    text-align:left;  /*Make the text goes to the left*/
+    width:50%;
+}
+
+ul {
+    font-family:Monospace;
+    left: 100px;
+    bottom:250px;
+    padding-left:75px;
+    width:26%;
+    
+}
+
+li:hover{
+    background-color:#DAA520; /*Bg color when the users hover the elements*/
+    opacity:0.67; 
+    display:inline-block; /*When the users hovers, the background color will just show within the text not stretching across the page*/
+}
+
+h3 {
+    font-size: 33px;
+    margin-left: 50px;
+}
+
+.iframe-position { /*Design all the iframes*/
+    display: flex; /*In order to make all the iframes display lined up as a column, set the display to be flex to be able to change.*/
+    flex-direction: column;
+    top:300px;
+    width: 455px;
+    height: 150px; 
+}
+
+.iframe-position iframe { /*Adjust the distance between the iframes.*/
+    margin-bottom: -50px;
+}
+
+#might {
+    color:#e0960b; /*Darker yellow*/
+    font-size:40px;
+    right:0;
+    top:210px;
+}
+
+.box {
+   z-index: -1;
+   width: 500px;
+   height: 570px;
+   background-color: rgba(0, 0, 0, 0.6);
+   right:-50px;
+   top:270px;
+}
+
+img {
+    width:184px;
+    height:190px;
+    top:613px;
+    filter:sepia(90%);
+}
+
+#listeners{
+    right:245px;
+    top: 590px; 
+    font-size:40px;
+}
+
+#spotify {
+    top:650px;
+    right:270px;
+    color:#1ED760;
+    font-size:35px;
+    
+}
+
+#monthly {
+    top: 710px; 
+    right:222px;
+}
